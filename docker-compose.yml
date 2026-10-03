@@ -1,0 +1,43 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: fixmycampus-postgres-compose
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: fixmycampus123
+      POSTGRES_DB: fixmycampus
+    ports:
+      - "5434:5432"
+    volumes:
+      - fixmycampus-compose-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fixmycampus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: fixmycampus-backend-compose
+    ports:
+      - "5001:5000"
+    environment:
+      PORT: 5000
+      JWT_SECRET: fixmycampus_super_secret_jwt_key_2026
+      DATABASE_URL: postgres://postgres:fixmycampus123@postgres:5432/fixmycampus
+      DB_SSL: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  frontend:
+    build: ./frontend
+    container_name: fixmycampus-frontend-compose
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  fixmycampus-compose-data:

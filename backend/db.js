@@ -29,10 +29,10 @@ async function initDB() {
     // Connect to external or local PostgreSQL server
     try {
       const pool = new Pool({
-        connectionString: dbUrl,
-        ssl: dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1')
-          ? false
-          : { rejectUnauthorized: false }
+      connectionString: dbUrl,
+      ssl: process.env.DB_SSL === 'true'
+        ? { rejectUnauthorized: false }
+        : false
       });
 
       // Test the connection
